@@ -1,0 +1,46 @@
+name: Lint - Main Branch
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+
+permissions:
+  contents: read
+
+jobs:
+  lint-backend:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      node-version: '20'
+      package: lint-check
+      path: src/backend
+
+  lint-frontend:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      node-version: '20'
+      package: lint-check
+      path: src/frontend
+
+  lint-common:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      node-version: '20'
+      package: lint-check
+      path: src/packages/common
+
+  notify-on-failure:
+    needs: [lint-backend, lint-frontend, lint-common]
+    if: always() && (needs.lint-backend.result == 'failure' || needs.lint-frontend.result == 'failure' || needs.lint-common.result == 'failure')
+    uses: ./.github/workflows/reusable-noti.yml
+    with:
+      title: '❌ Lint 검사가 실패했어요!'
+      description: 'main 브랜치의 lint 검사가 실패했습니다.'
+      link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      color: '15158332'
+    secrets: inherit
+

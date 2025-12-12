@@ -1,0 +1,57 @@
+---
+description: 코드 스타일 가이드 인덱스 - 모든 코드 스타일 규칙 참조
+globs:
+alwaysApply: true
+---
+# 코드 스타일 가이드
+
+이 문서는 프로젝트의 모든 코드 스타일 규칙을 포함하는 인덱스입니다. 실제 규칙은 다음 파일들에 분리되어 있습니다:
+
+## 규칙 파일 구조
+
+1. **[code-style-common.mdc](./code-style-common.mdc)** - 공통 규칙
+   - 네이밍 컨벤션
+   - Import 경로 설정
+   - 코드 스타일과 구조
+   - 에러 처리
+   - 예외 처리 원칙
+   - 린트 및 타입 체크 규칙
+
+2. **[code-style-typescript.mdc](./code-style-typescript.mdc)** - TypeScript 규칙
+   - TypeScript 기본 규칙
+   - 타입 안전성
+   - 타입 정의 원칙
+
+3. **[code-style-react.mdc](./code-style-react.mdc)** - React 공통 규칙
+   - 컴포넌트 구조
+   - 메모이제이션
+   - React Hooks 아키텍처
+
+4. **[code-style-nextjs.mdc](./code-style-nextjs.mdc)** - Next.js 전용 규칙
+   - 스타일 가이드라인
+   - 페이지 라우팅
+
+5. **[code-style-backend.mdc](./code-style-backend.mdc)** - 백엔드 전용 규칙
+   - Repository 패턴
+
+6. **[code-style-libraries.mdc](./code-style-libraries.mdc)** - 공통 라이브러리 규칙
+   - 날짜 처리 (dayjs)
+   - Zod 스키마
+
+## 적용 범위
+
+- **공통 규칙**: 모든 패키지 (`src/frontend`, `src/backend`, `src/packages/common`, `src/packages/email`)
+- **TypeScript 규칙**: TypeScript를 사용하는 모든 패키지
+- **React 규칙**: `src/frontend`
+- **Next.js 규칙**: `src/frontend`만
+- **백엔드 규칙**: `src/backend`만
+- **공통 라이브러리 규칙**: 프로젝트 전반
+
+## 빠른 참조
+
+- **네이밍 컨벤션**: `code-style-common.mdc`
+- **TypeScript 타입 정의**: `code-style-typescript.mdc`
+- **React Hooks 사용**: `code-style-react.mdc`
+- **웹 프론트엔드 개발**: `code-style-nextjs.mdc`
+- **백엔드 개발**: `code-style-backend.mdc`
+- **라이브러리 사용**: `code-style-libraries.mdc`

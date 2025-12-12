@@ -1,0 +1,45 @@
+name: Lint - Pull Request
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint-backend:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      node-version: '20'
+      package: lint-check
+      path: src/backend
+
+  lint-frontend:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      node-version: '20'
+      package: lint-check
+      path: src/frontend
+
+  lint-common:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      node-version: '20'
+      package: lint-check
+      path: src/packages/common
+
+  notify-on-failure:
+    needs: [lint-backend, lint-frontend, lint-common]
+    if: always() && (needs.lint-backend.result == 'failure' || needs.lint-frontend.result == 'failure' || needs.lint-common.result == 'failure')
+    uses: ./.github/workflows/reusable-noti.yml
+    with:
+      title: '❌ Lint 검사가 실패했어요!'
+      description: "PR: ${{ github.event.pull_request.title }}\n작성자: ${{ github.event.pull_request.user.login }}"
+      link: ${{ github.event.pull_request.html_url }}
+      color: '15158332'
+    secrets: inherit
+

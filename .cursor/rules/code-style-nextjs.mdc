@@ -1,0 +1,24 @@
+---
+description: Next.js 규칙 - 웹 프론트엔드(src/frontend) 전용
+globs:
+alwaysApply: true
+---
+# Next.js (웹 프론트엔드) 규칙
+
+`src/frontend` 패키지에만 적용되는 규칙입니다.
+
+## 스타일 가이드라인
+
+- Tailwind CSS를 모바일 우선 접근 방식으로 사용
+- 가능한 경우 Shadcn UI 및 Radix 컴포넌트 활용
+- 반응형 디자인 원칙 따르기
+
+## 페이지 라우팅
+
+- 라우트 구현에 Next.js App Router 사용
+- 해당 라우트와 함께 `src/app` 디렉토리에 페이지 생성
+- 대괄호 표기법으로 동적 라우트 구현 (예: `[id]`)
+- 데이터 가져오기 메서드를 실행하지 않고 URL 변경을 위한 shallow routing 사용
+- Next.js Metadata API로 적절한 SEO 최적화 구현
+- 각 페이지에 대한 로딩 및 에러 상태 처리
+- 인증된 라우트에 대한 라우트 가드 구현 고려

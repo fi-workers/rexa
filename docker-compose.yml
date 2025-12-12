@@ -1,0 +1,13 @@
+services:
+  rexa-postgresql:
+    image: postgres:17.6
+    container_name: rexa-postgresql
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.tmp/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: rexa

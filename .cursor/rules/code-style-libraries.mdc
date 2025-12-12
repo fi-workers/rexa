@@ -1,0 +1,35 @@
+---
+description: 공통 라이브러리 규칙 - 프로젝트 전반에서 사용하는 라이브러리
+globs:
+alwaysApply: true
+---
+# 공통 라이브러리 규칙
+
+프로젝트 전반에서 사용하는 라이브러리에 대한 규칙입니다.
+
+## 날짜 처리 (dayjs)
+
+- 모든 날짜 작업에 dayjs 라이브러리 사용
+- 일관된 날짜 처리를 위해 항상 타임존을 'Asia/Seoul'로 설정
+- 애플리케이션 전체에서 날짜 포맷 일관성 유지
+- 국제 사용자 경험을 위한 로케일 설정 고려
+
+## Zod 스키마
+
+- 객체 속성에 camelCase 사용
+- 스키마 이름에 PascalCase 사용
+  ```typescript
+  export const WorkspaceSchema = z.object({
+    workspaceId: z.number().int().positive(),
+    name: z.string().min(1),
+    userId: z.number().int().positive(),
+  });
+  ```
+
+### 타입 정의
+- 타입 이름에 PascalCase 사용
+- 속성에 camelCase 사용
+  ```typescript
+  export type Workspace = z.infer<typeof WorkspaceSchema>;
+  export type Consultation = z.infer<typeof ConsultationSchema>;
+  ```

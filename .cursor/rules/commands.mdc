@@ -1,0 +1,50 @@
+---
+description: 일반적인 명령어 및 개발 환경 설정
+globs:
+alwaysApply: true
+---
+# 일반적인 명령어
+
+## 개발 환경 실행
+
+```bash
+# 모든 서비스 실행 (Traefik, Frontend)
+yarn dev
+
+# 개별 서비스 실행
+yarn @rexa/frontend dev    # 웹 프론트엔드 (포트 3000)
+yarn @rexa/backend dev      # 백엔드 서버
+```
+
+## 빌드 및 타입 체크
+
+```bash
+# 전체 프로젝트 린트 및 타입 체크
+yarn lint
+
+# 개별 패키지
+yarn @rexa/frontend lint && yarn @rexa/frontend ts-check
+yarn @rexa/backend lint && yarn @rexa/backend ts-check
+yarn @rexa/common lint && yarn @rexa/common ts-check
+yarn @rexa/email lint && yarn @rexa/email ts-check
+```
+
+## 데이터베이스
+
+```bash
+# 마이그레이션 생성 및 적용
+yarn @rexa/backend migrate
+
+# 마이그레이션 생성만
+yarn @rexa/backend db:generate
+
+# 마이그레이션 적용만
+yarn @rexa/backend db:migrate
+```
+
+## 테스트
+
+```bash
+# 테스트 실행 (프로젝트 구조에 따라 다를 수 있음)
+# 테스트 명령어는 프로젝트별로 확인 필요
+```

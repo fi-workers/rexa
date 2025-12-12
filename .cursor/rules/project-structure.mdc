@@ -1,0 +1,146 @@
+---
+description: 프로젝트 구조와 기술 스택 정보
+globs:
+alwaysApply: true
+---
+# 프로젝트 구조 가이드
+
+## 프로젝트 개요
+
+Rexa는 웹 문서를 AI가 바로 이해하고 활용할 수 있는 형태로 재구성(Recast)해주는 로컬 퍼스트 문서 엔진입니다.
+
+**핵심 철학**: "AI에게 무엇을 가르칠지는, 당신이 정한다."
+
+### 주요 기능
+
+- 📄 웹 문서를 신뢰 가능한 Markdown으로 변환
+- 🧠 LLM 친화적인 llms.txt 생성
+- 🔎 RAG(Retrieval-Augmented Generation) 구축
+- 🔌 MCP(Model Context Protocol) 서버로 AI에 제공
+- 💻 로컬에서 실행 (인프라 0)
+
+## 모노레포 구조
+
+Rexa는 4개의 핵심 모듈로 구성된 모노레포입니다:
+
+```
+rexa/
+├─ packages/
+│  ├─ crawler/        ← Module 1: DocCrawler
+│  ├─ llms/           ← Module 2: LLMSTextBuilder
+│  ├─ rag/            ← Module 3: RAGBuilder
+│  ├─ mcp/            ← Module 4: MCPResponder
+│  ├─ cli/            ← CLI 인터페이스
+│  └─ core/           ← 공유 타입 및 유틸리티
+├─ docs/              ← 문서
+│  ├─ product/        ← 제품 비전
+│  ├─ architecture/    ← 아키텍처 설계
+│  └─ modules/         ← 모듈별 가이드
+└─ README.md
+```
+
+## 기술 스택
+
+- **언어**: TypeScript (strict mode)
+- **런타임**: Node.js
+- **패키지 관리**: Yarn Workspaces
+- **문서 크롤링**:
+  - node-fetch / undici
+  - cheerio (HTML 파싱)
+  - turndown (HTML → Markdown)
+- **MCP**: @modelcontextprotocol/sdk
+- **RAG**:
+  - OpenAI embeddings (선택)
+  - Local embedding models (선택)
+  - Vector stores (sqlite, in-memory, pgvector 등)
+
+## 핵심 모듈
+
+### Module 1: DocCrawler (`@rexa/crawler`)
+
+웹 문서 사이트를 크롤링하여 고품질 Markdown으로 변환
+
+- URL Scope 기반 크롤링 (필수)
+- HTML → Markdown 변환
+- 문서 메타데이터 관리
+
+### Module 2: LLMSTextBuilder (`@rexa/llms`)
+
+Markdown 문서를 LLM 표준 포맷인 llms.txt로 재구성
+
+- Heading 기반 section 분리
+- 중복 제거
+- 토큰 수 고려한 분할
+
+### Module 3: RAGBuilder (`@rexa/rag`)
+
+llms.txt 기반으로 검색 가능한 RAG 인덱스 생성
+
+- 텍스트 chunking
+- Embedding 생성
+- Vector store 구축
+
+### Module 4: MCPResponder (`@rexa/mcp`)
+
+RAG를 기반으로 MCP 서버를 통해 AI에 응답 제공
+
+- MCP Tools 정의
+- RAG 검색 실행
+- Context 반환
+
+## 파일 구조
+
+### 크롤링 결과물
+
+```
+docs/<domain>/
+ ├─ pages/
+ │   ├─ getting-started.md
+ │   ├─ hooks-useState.md
+ ├─ merged.md
+ ├─ llms.txt
+ ├─ rag-index/
+ └─ meta.json
+```
+
+### meta.json 구조
+
+```json
+{
+  "url": "https://react.dev",
+  "domain": "react.dev",
+  "scope": {
+    "type": "prefix",
+    "allow": ["https://react.dev/reference"],
+    "deny": ["https://react.dev/blog"]
+  },
+  "pageCount": 112,
+  "lastCrawledAt": "2025-01-10T12:00:00Z"
+}
+```
+
+## 모듈 간 연동 원칙
+
+### 파일 기반 인터페이스
+
+각 모듈은 파일 시스템을 통해 통신한다.
+
+### 단방향 의존성
+
+- Module 2는 Module 1의 Markdown 파일만 신뢰
+- Module 3은 Module 2의 llms.txt만 신뢰
+- Module 4는 Module 3의 RAGIndex 인터페이스만 사용
+
+### 독립 테스트 가능
+
+각 모듈은 다른 모듈 없이도 단독 테스트 가능하다.
+
+## 문서 참조
+
+자세한 내용은 다음 문서를 참고:
+
+- [제품 비전](../../docs/product/vision.md)
+- [아키텍처 개요](../../docs/architecture/overview.md)
+- [모듈 설계](../../docs/architecture/modules.md)
+- [API 설계](../../docs/architecture/api-design.md)
+- [모듈별 가이드](../../docs/modules/)

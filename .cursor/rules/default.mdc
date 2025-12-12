@@ -1,0 +1,44 @@
+---
+description: Rexa 프로젝트의 Cursor AI 개발 규칙 인덱스
+globs:
+alwaysApply: true
+---
+# Rexa - Cursor AI 개발 가이드
+
+이 파일은 프로젝트의 모든 개발 규칙을 참조하는 인덱스입니다.
+
+## 규칙 파일 구조
+
+프로젝트의 개발 규칙은 목적별로 다음과 같이 분리되어 있습니다:
+
+1. **rexa-product.mdc** - Rexa 제품 비전, 아키텍처, 모듈 설계 규칙
+2. **ai-collaboration.mdc** - AI 협업 철학, 절대 원칙, AI 코드 생성 가이드라인, 컨텍스트 관리, 문제 해결 전략
+3. **code-style.mdc** - 코드 스타일, 네이밍 컨벤션, TypeScript 규칙, 컴포넌트 구조, 스타일 가이드라인
+4. **tdd.mdc** - TDD 원칙, 테스트 가이드라인, 코드 품질 기준
+5. **project-structure.mdc** - 프로젝트 개요, 프로젝트 구조, 기술 스택
+6. **commands.mdc** - 일반적인 명령어 및 개발 환경 설정
+7. **git-workflow.mdc** - Git 워크플로우 및 커밋 규칙
+8. **domain-glossary.mdc** - 도메인 용어집 및 앵커 코멘트 가이드라인
+
+모든 규칙 파일은 `.cursor/rules/` 디렉토리에 있으며, `alwaysApply: true`로 설정되어 자동으로 적용됩니다.
+
+## 빠른 참조
+
+- **Rexa 제품 이해**: `rexa-product.mdc` 참조
+- **AI와 협업할 때**: `ai-collaboration.mdc` 참조
+- **코드를 작성할 때**: `code-style.mdc` 참조
+- **테스트를 작성할 때**: `tdd.mdc` 참조
+- **프로젝트 구조를 확인할 때**: `project-structure.mdc` 참조
+- **명령어를 찾을 때**: `commands.mdc` 참조
+- **Git 작업을 할 때**: `git-workflow.mdc` 참조
+- **도메인 용어를 확인할 때**: `domain-glossary.mdc` 참조
+
+## 규칙 관리
+
+- **중복 제거**: Cursor 규칙과 Claude 규칙에 반복되는 내용이 발견되면 적절한 규칙 파일에 통합
+- **규칙 추가**: 개발 중 반복적으로 지시되는 내용은 즉시 해당 규칙 파일에 추가
+- **일관성 유지**: 모든 규칙은 `.cursor/rules/` 디렉토리에 통일된 형식으로 관리
+
+## 중요 사항
+
+모든 규칙은 한글로 작성되어 있으며, 프로젝트의 특성에 맞게 커스터마이징되었습니다.

@@ -1,0 +1,59 @@
+name: Reusable Lint Notification
+
+on:
+  workflow_call:
+    inputs:
+      title:
+        required: true
+        type: string
+        description: 'Notification title'
+      description:
+        required: false
+        type: string
+        description: 'Notification description'
+      link:
+        required: false
+        type: string
+        description: 'Link URL'
+      color:
+        required: false
+        type: string
+        default: '15158332'
+        description: 'Embed color (decimal, default: red)'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Discord
+        run: |
+          # Escape title and description
+          TITLE="${{ inputs.title }}"
+          TITLE_ESCAPED=$(echo "$TITLE" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+
+          DESCRIPTION="${{ inputs.description }}"
+          if [ -n "$DESCRIPTION" ]; then
+            DESCRIPTION_ESCAPED=$(echo "$DESCRIPTION" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+          fi
+
+          COLOR="${{ inputs.color }}"
+          LINK="${{ inputs.link }}"
+
+          # Build embed JSON
+          EMBED_JSON="{\"title\": \"$TITLE_ESCAPED\", \"color\": $COLOR"
+
+          if [ -n "$DESCRIPTION" ]; then
+            EMBED_JSON="${EMBED_JSON}, \"description\": \"$DESCRIPTION_ESCAPED\""
+          fi
+
+          if [ -n "$LINK" ]; then
+            EMBED_JSON="${EMBED_JSON}, \"url\": \"$LINK\""
+          fi
+
+          EMBED_JSON="${EMBED_JSON}, \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+
+          # Send notification
+          curl -H "Content-Type: application/json" \
+            -d "{\"embeds\": [$EMBED_JSON]}" \
+            ${{ secrets.DISCORD_PULL_REQUEST_WEBHOOK_URL }}
+

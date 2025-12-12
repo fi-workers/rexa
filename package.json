@@ -1,0 +1,30 @@
+{
+  "name": "rexa",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "src/backend",
+      "src/packages/crawler"
+    ]
+  },
+  "scripts": {
+    "install": "husky install",
+    "@rexa/crawler": "yarn workspace @rexa/crawler",
+    "lint": "concurrently --max-processes 1 \"yarn:lint-*\"",
+    "lint-crawler": "yarn @rexa/crawler lint && yarn @rexa/crawler ts-check",
+    "dev": "concurrently -c \"bgGreen.bold,bgMagenta.bold,bgYellow.bold,bgBlue.bold\" \"yarn:run-*\""
+  },
+  "lint-staged": {
+    "src/packages/crawler/**/*.{js,jsx,ts,tsx}": [
+      "yarn lint-crawler"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "9.2.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.2"
+  },
+  "packageManager": "yarn@4.11.0"
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "@fw/eslint-config/react/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@rexa/crawler/*": ["./*"]
+    },
+    "moduleResolution": "node",
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "types/**/*.d.ts"],
+  "exclude": ["node_modules"]
+}

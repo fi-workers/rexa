@@ -1,0 +1,9 @@
+{
+    "cSpell.words": [
+        "luxon",
+        "nder"
+    ],
+    "eslint.workingDirectories": [
+        "./src/packages/crawler"
+    ]
+}

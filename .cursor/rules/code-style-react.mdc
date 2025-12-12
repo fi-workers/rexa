@@ -1,0 +1,261 @@
+---
+description: React 공통 규칙 - React 기반 프레임워크에 적용
+globs:
+alwaysApply: true
+---
+# React 규칙
+
+React를 사용하는 모든 패키지(`src/frontend`)에 적용되는 규칙입니다.
+
+## 컴포넌트 구조
+
+- TypeScript 인터페이스를 사용한 함수형 컴포넌트 사용
+- 컴포넌트 검증을 위한 적절한 prop 타입 구현
+- 파일 구조: 내보낸 컴포넌트, 하위 컴포넌트, 헬퍼, 정적 콘텐츠, 타입
+- 더 나은 코드 구성을 위한 컴포넌트 기반 아키텍처 사용
+- 절대적으로 필요한 경우를 제외하고 named exports 선호
+
+## 메모이제이션
+
+- 불필요한 재계산을 방지하기 위해 비용이 많이 드는 계산에 `useMemo` 사용
+- 자식 컴포넌트에 prop으로 전달되는 함수에 `useCallback` 적용하여 참조 동등성 유지
+- 적절한 경우 순수 컴포넌트에 `React.memo()`로 컴포넌트 렌더링 메모이제이션
+- 조기 최적화 피하기 - 측정 가능한 성능 이점이 있을 때만 메모이제이션 사용
+- 의존성 배열을 신중하게 고려하고 모든 의존성이 적절히 선언되었는지 확인
+
+## React Hooks 아키텍처
+
+**⚠️ 클라이언트 및 React 개발 시 필수 참고**: React 18/19 환경을 기준으로 현대적인 훅 사용 방식을 따르고, 기존의 오용 패턴(특히 useEffect 중심 개발)을 방지해야 합니다.
+
+### useEffect 사용 제한
+
+#### 금지 사항
+
+- **데이터 파생값 계산을 useEffect 안에서 처리하는 행위**
+  ```typescript
+  // ❌ 잘못된 사용 - 파생값을 effect에서 계산
+  const [fullName, setFullName] = useState('');
+  useEffect(() => {
+    setFullName(`${firstName} ${lastName}`);
+  }, [firstName, lastName]);
+
+  // ✅ 올바른 사용 - 렌더링 중 계산
+  const fullName = `${firstName} ${lastName}`;
+  ```
+
+- **이전 값과 동일할 수 있는 변경에 대한 불필요한 재실행**
+- **렌더링 중 계산 가능한 로직을 effect에 넣는 행위**
+
+#### 허용 사항
+
+- **실제 사이드 이펙트(외부 세계와의 상호작용)**만 useEffect에서 허용
+  - 네트워크 요청 트리거
+  - DOM 조작
+  - 구독 시작/종료
+  - 브라우저 API 호출
+
+```typescript
+// ✅ 올바른 사용 - 실제 사이드 이펙트
+useEffect(() => {
+  const subscription = subscribe();
+  return () => subscription.unsubscribe();
+}, [deps]);
+
+// ✅ 올바른 사용 - 네트워크 요청
+useEffect(() => {
+  fetchData(id).then(setData);
+}, [id]);
+```
+
+#### 권장 사항
+
+- effect 내부에서 최신 상태/props가 필요할 경우 **useEffectEvent** 사용 (React 19+)
+- 렌더링 중 계산 가능하면 **useMemo / useCallback** 혹은 기본 렌더 로직으로 해결
+- useEffect를 사용하기 전 반드시 다음 질문을 검토:
+  1. "이 로직은 외부 세계와 상호작용하는가?"
+  2. "렌더링 중 계산으로 충분한가?"
+
+### 커스텀 훅의 목적 정의
+
+#### 목적
+
+- 단순한 코드 재사용이 아니라 **UI에서 도메인 로직을 분리하는 아키텍처적 도구**
+
+#### 규칙
+
+- 컴포넌트 내부에 존재하는 도메인/비즈니스 로직은 반드시 커스텀 훅으로 이동
+- 훅은 **작고 목적이 명확**해야 한다
+- SSR 환경에서는 반드시 **결정론적 초기값**을 사용하여 hydration mismatch 방지
+
+```typescript
+// ✅ 올바른 사용 - 도메인 로직 분리
+function useUserProfile(userId: number) {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserProfile(userId).then((data) => {
+      setProfile(data);
+      setLoading(false);
+    });
+  }, [userId]);
+
+  return { profile, loading };
+}
+
+// ❌ 잘못된 사용 - 컴포넌트에 로직이 섞임
+function UserComponent({ userId }: { userId: number }) {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  // ... 로직이 컴포넌트에 직접 구현됨
+}
+```
+
+### 외부 구독 기반 상태는 useSyncExternalStore 사용
+
+#### 사용 시나리오
+
+- 브라우저 API (matchMedia, scroll, visibility 등)
+- 외부 상태 스토어 (Redux, Zustand 등)
+- 고빈도 업데이트, tearing 가능성이 있는 모든 상태
+
+#### 규칙
+
+- `useState` 대체 용도로 사용하지 말 것
+- SSR 환경에서는 fallback getter 제공할 것
+
+```typescript
+// ✅ 올바른 사용 - 외부 스토어 구독
+function useStoreSelector<T>(selector: (state: State) => T) {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => selector(store.getState()),
+    () => selector(store.getState()), // SSR fallback
+  );
+}
+
+// ✅ 올바른 사용 - 브라우저 API 구독
+function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (callback) => {
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener('change', callback);
+      return () => mediaQuery.removeEventListener('change', callback);
+    },
+    () => window.matchMedia(query).matches,
+    () => false, // SSR fallback
+  );
+}
+```
+
+### 동시성 API 활용 지침
+
+#### 도구
+
+- **startTransition**: 상태 업데이트를 지연 · 우선순위 조절
+- **useDeferredValue**: 파생값을 지연해 UI 입력 성능 유지
+
+#### 규칙
+
+- 무거운 연산으로 인한 렌더링 지연 시에만 사용
+- 사소한 연산을 최적화하기 위한 과도한 사용 금지
+- transition과 deferred를 함께 사용할 수 있으나, 필요 최소한으로 유지
+
+```typescript
+// ✅ 올바른 사용 - 무거운 연산 지연
+function SearchComponent() {
+  const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  const results = useMemo(() => expensiveSearch(deferredQuery), [deferredQuery]);
+
+  return (
+    <>
+      <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      <ResultsList results={results} />
+    </>
+  );
+}
+
+// ✅ 올바른 사용 - 우선순위 조절
+function handleTabChange(newTab: string) {
+  setTab(newTab); // 즉시 업데이트
+  startTransition(() => {
+    setHeavyData(loadHeavyData(newTab)); // 지연 업데이트
+  });
+}
+```
+
+### 테스트·디버깅 가능한 훅 구조
+
+#### 규칙
+
+- UI와 도메인 로직을 분리하고 훅 단위로 테스트 가능하게 구성
+- Provider 로직은 별도의 훅(useXXXProvider)로 분리
+- 커스텀 훅의 내부 상태·함수를 DevTools로 쉽게 추적 가능한 구조 유지
+
+```typescript
+// ✅ 올바른 사용 - 테스트 가능한 구조
+function useAuthProvider() {
+  const [user, setUser] = useState<User | null>(null);
+  const login = useCallback(async (credentials: Credentials) => {
+    const userData = await authenticate(credentials);
+    setUser(userData);
+  }, []);
+
+  return { user, login };
+}
+
+// Provider는 별도로 분리
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const auth = useAuthProvider();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+}
+```
+
+### 데이터 중심 React 아키텍처 채택
+
+#### 방향
+
+- useEffect 의존도를 줄이고 **렌더링 주도 데이터 흐름**을 우선
+- 서버 컴포넌트·use()·서버 액션 기반 패턴을 염두에 둘 것
+
+#### 권장 API
+
+- **use()**: 서버/비동기 리소스를 렌더링 중 처리 (React 19+)
+- **useEffectEvent**: 안정적인 이펙트 콜백 (React 19+)
+- **useActionState**: 워크플로우 기반 비동기 상태 (React 19+)
+- 프레임워크의 데이터 캐싱/로딩 API 적극 활용
+
+```typescript
+// ✅ 올바른 사용 - use()로 비동기 리소스 처리
+function UserProfile({ userPromise }: { userPromise: Promise<User> }) {
+  const user = use(userPromise);
+  return <div>{user.name}</div>;
+}
+
+// ✅ 올바른 사용 - useActionState로 폼 상태 관리
+function LoginForm() {
+  const [state, formAction] = useActionState(loginAction, null);
+  return <form action={formAction}>...</form>;
+}
+```
+
+### 커스텀 훅 설계 원칙 (최종 요약)
+
+1. **파생 상태는 렌더링 중 계산**한다
+2. **useEffect는 오직 실제 사이드 이펙트에만** 사용
+3. **목적이 명확한 훅들로 로직을 작게 쪼개어 조합**
+4. **동시성 도구로 UI 부드러움 유지**
+5. **서버/클라이언트 경계를 고려한 설계**
+6. **미래 React 변화(데이터 중심 흐름)에 대응 가능한 구조를 지향**
+
+### React Hooks 체크리스트
+
+React 컴포넌트나 커스텀 훅을 작성할 때 다음을 확인:
+
+1. ✅ useEffect를 사용하기 전 "이것이 실제 사이드 이펙트인가?" 질문했는가?
+2. ✅ 파생값을 useEffect가 아닌 렌더링 중 계산으로 처리했는가?
+3. ✅ 도메인 로직이 커스텀 훅으로 분리되었는가?
+4. ✅ 외부 구독이 필요한 경우 useSyncExternalStore를 사용했는가?
+5. ✅ 무거운 연산에 동시성 API(startTransition, useDeferredValue)를 적절히 사용했는가?
+6. ✅ SSR 환경을 고려하여 결정론적 초기값과 fallback을 제공했는가?
+7. ✅ 훅이 작고 목적이 명확한가?

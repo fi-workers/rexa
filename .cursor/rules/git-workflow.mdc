@@ -1,0 +1,53 @@
+---
+description: Git 워크플로우 및 커밋 규칙
+globs:
+alwaysApply: true
+---
+# Git 워크플로우
+
+## 브랜치 전략
+
+- `feature/` - 새 기능 개발
+- `fix/` - 버그 수정
+- `refactor/` - 리팩토링
+
+## 커밋 메시지
+
+```
+feat: 기능 설명 [AI]
+- 상세 변경사항 1
+- 상세 변경사항 2
+
+AI 보조: 핵심 로직 생성됨, 테스트는 인간 작성
+```
+
+**태그 종류**:
+- `[AI]`: 상당한 AI 지원 (50% 이상 생성)
+- `[AI-minor]`: 소규모 AI 지원 (50% 미만 생성)
+- `[AI-review]`: AI를 코드 리뷰용으로만 사용
+
+## AI 실험용 격리된 환경
+
+```bash
+# AI 실험용 격리된 환경 생성
+git worktree add ../ai-experiments/cool-feature -b ai/cool-feature
+
+# 격리된 워크트리에서 Claude 실험
+cd ../ai-experiments/cool-feature
+# ... 많은 실험적 커밋들 ...
+
+# 좋은 것만 메인으로 체리픽
+cd ../main-repo
+git cherry-pick abc123  # 작동한 커밋만
+
+# 완료 후 정리
+git worktree remove ../ai-experiments/cool-feature
+```
+
+## Git 작업 시 Claude 활용
+
+Claude는 많은 git 작업을 효과적으로 처리할 수 있습니다:
+
+- **Git 히스토리 검색**: "v1.2.3에 어떤 변경사항이 포함되었나요?", "이 기능의 소유자는 누구인가요?", "이 API가 왜 이렇게 설계되었나요?" 같은 질문에 답하기 위해 git 히스토리를 명시적으로 검색하도록 요청
+- **커밋 메시지 작성**: Claude는 변경사항과 최근 히스토리를 자동으로 확인하여 관련 컨텍스트를 모두 고려한 메시지를 작성
+- **복잡한 git 작업**: 파일 되돌리기, rebase 충돌 해결, 패치 비교 및 병합
