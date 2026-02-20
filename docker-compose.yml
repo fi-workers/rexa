@@ -11,3 +11,15 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: test
       POSTGRES_DB: rexa
+
+  # PostgreSQL MCP server (pg-mcp-server)
+  rexa-pg-mcp:
+    build: https://github.com/stuzero/pg-mcp-server.git
+    container_name: rexa-pg-mcp
+    restart: unless-stopped
+    depends_on:
+      - rexa-postgresql
+    ports:
+      - "8003:8000"
+    environment:
+      DATABASE_URL: postgresql://admin:test@rexa-postgresql:5432/rexa
