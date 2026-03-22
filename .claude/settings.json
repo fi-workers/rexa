@@ -1,0 +1,16 @@
+{
+  "extraKnownMarketplaces": {
+    "fi-workers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "fi-workers/claude-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "pr-reviewer@fi-workers-marketplace": true,
+    "codex-reviewer@fi-workers-marketplace": true,
+    "clean-architecture@fi-workers-marketplace": true,
+    "kent-beck-style@fi-workers-marketplace": true
+  }
+}
